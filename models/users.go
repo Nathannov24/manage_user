@@ -18,3 +18,10 @@ type UserLogin struct {
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 }
+
+type GetAllUser struct {
+	User_Name string `json:"user_name" form:"user_name"`
+	Name      string `json:"name" form:"name"`
+	Email     string `json:"email" form:"email"`
+	Role      string `json:"role" form:"role"`
+}

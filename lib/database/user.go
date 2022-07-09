@@ -18,6 +18,15 @@ func GetUser(id int) (interface{}, error) {
 	return user, nil
 }
 
+func GetUserAll(limit, offset int) ([]models.Users, error) {
+	var member []models.Users
+
+	if err := config.DB.Limit(limit).Offset(offset).Find(&member).Error; err != nil {
+		return nil, err
+	}
+	return member, nil
+}
+
 func GetUserByEmail(email string) (int64, error) {
 	tx := config.DB.Where("email = ?", email).First(&user)
 	if tx.Error != nil {
@@ -91,4 +100,16 @@ func GeneratehashPassword(password string) (string, error) {
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func Search(id, idUser, idEmail string) (interface{}, error) {
+	var member models.Users
+	query := config.DB.Table("users").Where("name = ? OR user_name = ? OR email = ? AND deleted_at IS NULL", id, idUser, idEmail).Find(&member)
+	if query.Error != nil {
+		return nil, query.Error
+	}
+	if query.RowsAffected == 0 {
+		return 0, nil
+	}
+	return member, nil
 }

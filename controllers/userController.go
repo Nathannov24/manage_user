@@ -70,6 +70,26 @@ func GetUsersController(c echo.Context) error {
 	})
 }
 
+func GetAllUsersController(c echo.Context) error {
+	limit, _ := strconv.Atoi(c.QueryParam("limit"))
+	offset, _ := strconv.Atoi(c.QueryParam("offset"))
+	user, e := database.GetUserAll(limit, offset)
+	if e != nil {
+		return c.JSON(http.StatusInternalServerError, responses.StatusFailed("internal server error"))
+	}
+	var result []models.GetAllUser
+	for _, v := range user {
+		var data models.GetAllUser
+		data.User_Name = v.User_Name
+		data.Email = v.Email
+		data.Name = v.Name
+		data.Role = v.Role
+
+		result = append(result, data)
+	}
+	return c.JSON(http.StatusOK, responses.StatusSuccessData("success get user", result))
+}
+
 //delete user by id
 func DeleteUserController(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -100,4 +120,15 @@ func UpdateUserController(c echo.Context) error {
 		"message": "success",
 		"data":    respon,
 	})
+}
+
+func SearchController(c echo.Context) error {
+	id := c.QueryParam("name")
+	idUser := c.QueryParam("user_name")
+	idEmail := c.QueryParam("email")
+	user, _ := database.Search(id, idUser, idEmail)
+	if user == 0 {
+		return c.JSON(http.StatusBadRequest, responses.StatusFailed("user not found"))
+	}
+	return c.JSON(http.StatusOK, responses.StatusSuccessData("success get user", user))
 }
